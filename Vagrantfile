@@ -29,7 +29,8 @@ $os = 'ubuntu'
 $provider_boxes = {
   :virtualbox => {
     'ubuntu' => {
-      :box_name => 'ubuntu/xenial64',
+      :box_name => 'kumulus/xenial64',
+      :box_url => 'https://www.dropbox.com/s/z8rb65j7w5ym820/dual-xenial.box?dl=1',
     }
   },
   :libvirt => {
@@ -94,7 +95,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
   end
 
-  def customize_vm(config, vm_mem)
+  def customize_vm(config, vm_mem, vm_name)
 
     if $use_nfs then
       config.vm.synced_folder ".", "/vagrant", nfs: true
@@ -123,13 +124,17 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       v.customize ["modifyvm", :id, "--nictype1", "virtio"]
       v.customize ["modifyvm", :id, "--nictype2", "virtio"]
       v.customize ["modifyvm", :id, "--nictype3", "virtio"]
+      # unless File.exist?("#{vm_name}.vdi")
+      #   v.customize ['createhd', '--filename', "#{vm_name}.vdi", '--variant', 'Fixed', '--size', 20 * 1024]
+      # end
+      # v.customize ['storageattach', :id,  '--storagectl', 'SCSI', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', "#{vm_name}.vdi"]
     end
   end
 
   # Kubernetes control
-  config.vm.define "control" do |c|
-    customize_vm c, $vm_control_mem
-    c.vm.provision "shell", run: "once", path: "control-ubuntu.sh"
+  config.vm.define 'control' do |c|
+    customize_vm c, $vm_control_mem, 'control'
+    #c.vm.provision "shell", run: "once", path: "control-ubuntu.sh"
     c.vm.hostname = 'control'
     c.vm.network "private_network", ip: "#{$control_ip}"
     c.vm.network "private_network", ip: "#{$control_alt_ip}"
@@ -140,14 +145,20 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     node_vm_name = "node-#{n+1}"
 
     config.vm.define node_vm_name do |node|
-      customize_vm node, $vm_node_mem
+      customize_vm node, $vm_node_mem, node_vm_name
 
       node_ip = $node_ips[n]
       node_alt_ip = $node_alt_ips[n]
-      node.vm.provision "shell", run: "once", path: "node-ubuntu.sh"
+      #node.vm.provision "shell", run: "once", path: "node-ubuntu.sh"
       node.vm.hostname = "node-#{n+1}"
       node.vm.network "private_network", ip: "#{node_ip}"
       node.vm.network "private_network", ip: "#{node_alt_ip}"
+      if "#{n}" == "#{$num_node.to_i-1}"
+        config.vm.provision "ansible" do |a|
+          a.playbook = "configure_baseline.yml"
+          a.limit = "all"
+        end
+      end
     end
   end
 end
