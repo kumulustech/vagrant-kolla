@@ -53,7 +53,7 @@ else #  windows?
 end
 
 # Give VM 1024MB of RAM by default
-$vm_control_mem = (ENV['CONTRL_MEMORY'] || 4096).to_i
+$vm_control_mem = (ENV['CONTRL_MEMORY'] || 6144).to_i
 $vm_node_mem = (ENV['NODE_MEMORY'] || 2048).to_i
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
