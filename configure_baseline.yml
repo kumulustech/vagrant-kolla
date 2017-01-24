@@ -38,7 +38,6 @@
     copy: src={{item}} dest=/root/{{item}} mode=0755
     with_items:
       - add_flavor.sh
-      - debian.sh
       - debian-mn.sh
       - post-install.sh
       - debian-cmp.sh

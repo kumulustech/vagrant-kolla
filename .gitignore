@@ -1,3 +1,5 @@
 .vagrant
 .cachedir
+id_rsa*
+*retry
 *log
