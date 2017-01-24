@@ -47,7 +47,7 @@
       - node_delete.sh
       - launch.sh
   - name: upload multinode template
-    copy: src=multinode.tmpl dest=/root/multinode
+    copy: src=templates/multinode.j2 dest=/root/multinode
 
 - hosts: control
   become: true
