@@ -138,6 +138,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     c.vm.hostname = 'control'
     c.vm.network "private_network", ip: "#{$control_ip}"
     c.vm.network "private_network", ip: "#{$control_alt_ip}"
+#    c.vm.network "public_network", auto_config: false
   end
 
   # Kubernetes node
