@@ -58,7 +58,7 @@
     register: mutli_node
     ignore_errors: true
 
-- hosts: compute
+- hosts: node*
   become: true
   become_user: root
   tasks:
