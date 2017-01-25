@@ -28,15 +28,6 @@ tee > /root/open.rc <<EOF
 # "source this file, don't subshell" predicate inspired by
 # http://stackoverflow.com/a/23009039/6195005
 
-if [[ \$_ == \$0 ]] ; then
-    echo "You ran this script instead of sourcing it."
-    echo "  usage: source $0"
-    echo "Aborting."
-    exit 1
-else
-    echo "Setting environment variables in the current shell"
-fi
-
 export OS_PROJECT_DOMAIN_ID=default
 export OS_USER_DOMAIN_ID=default
 export OS_PROJECT_NAME=admin
