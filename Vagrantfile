@@ -29,8 +29,8 @@ $os = 'ubuntu'
 $provider_boxes = {
   :virtualbox => {
     'ubuntu' => {
-      :box_name => 'kumulus/xenial64',
-      :box_url => 'https://www.dropbox.com/s/z8rb65j7w5ym820/dual-xenial.box?dl=1',
+      :box_name => 'ubuntu/xenial64',
+      #:box_url => 'https://www.dropbox.com/s/z8rb65j7w5ym820/dual-xenial.box?dl=1',
     }
   },
   :libvirt => {
