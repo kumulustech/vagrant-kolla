@@ -7,5 +7,5 @@ ff02::2 ip6-allrouters
 
 # Hosts
 {% for host in groups['all'] %}
-{{hostvars[host]['ansible_enp0s8']['ipv4']['address']}} {% if domain is defined %}{{ host }}.{{domain}}{% endif %} {{host}}.local.lan {{host}}
+{{hostvars[host]['ansible_enp0s9']['ipv4']['address']}} {% if domain is defined %}{{ host }}.{{domain}}{% endif %} {{host}}.local.lan {{host}}
 {% endfor %}

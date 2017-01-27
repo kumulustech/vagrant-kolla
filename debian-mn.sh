@@ -2,9 +2,6 @@
 
 apt-get update
 apt-get dist-upgrade -y
-#apt-get install curl \
-#    linux-image-extra-$(uname -r) \
-#    linux-image-extra-virtual -y
 apt-get install \
     python-pip \
     vim \
@@ -86,6 +83,12 @@ enable_cinder: "yes"
 kolla_base_distro: "ubuntu"
 kolla_install_type: "source"
 openstack_release: "3.0.0"
+enable_ceilometer: "yes"
+enable_aodh: "yes"
+enable_gnocchi: "yes"
+ceilometer_database_type: "gnocchi"
+enable_cinder: "yes"
+cinder_volume_group: "cinder-volumes"
 EOF
 fi
 

@@ -1,6 +1,7 @@
 # These initial groups are the only groups required to be modified. The
 # additional groups are for more control of the environment.
 [control]
+kolla-control.opsits.com
 control
 # These hostname must be resolvable from your deployment host
 #__CONTROL__
@@ -11,16 +12,19 @@ control
 # The network nodes are where your l3-agent and loadbalancers will run
 # This can be the same as a host in the control group
 [network]
+kolla-control.opsits.com
 control
 #__CONTROL__
 
 [compute]
+kolla-compute.opsits.com
 node-1
 
 #__COMPUTE__
 
 [monitoring]
 control
+kolla-control.opsits.com
 #__CONTROL__
 
 # When compute nodes and control nodes use different interfaces,
@@ -28,6 +32,8 @@ control
 #compute01 neutron_external_interface=eth0 api_interface=em1 storage_interface=em1 tunnel_interface=em1
 
 [storage]
+control
+kolla-control.opsits.com
 #__CONTROL__
 
 [baremetal:children]

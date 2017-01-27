@@ -9,12 +9,11 @@
 
 - hosts: localhost
   connection: local
-  become: true
-  become_user: root
   tasks:
   - name: find local ssh keys
     find: path='./' patterns='id_rsa.*'
     register: ssh_found
+  - debug: var=ssh_found
   - name: create ssh key
     command: ssh-keygen -t rsa -N '' -f id_rsa
     run_once: true

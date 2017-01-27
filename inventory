@@ -1,0 +1,9 @@
+[control]
+kolla-control.opsits.com
+
+[compute]
+kolla-compute.opsits.com
+
+[all:vars]
+ansible_ssh_user=root
+ansible_ssh_key_file=~/.ssh/id_rsa #private key name

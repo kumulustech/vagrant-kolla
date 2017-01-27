@@ -8,7 +8,7 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.require_version ">= 1.7.4"
 
 # The number of nodes to provision
-$num_node = (ENV['NUM_NODES'] || 1).to_i
+$num_node = (ENV['NUM_NODES'] || 0).to_i
 
 # ip configuration
 $control_ip = ENV['CONTROL_IP'] || "192.168.56.10"
@@ -53,7 +53,7 @@ else #  windows?
 end
 
 # Give VM 1024MB of RAM by default
-$vm_control_mem = (ENV['CONTRL_MEMORY'] || 8192).to_i
+$vm_control_mem = (ENV['CONTRL_MEMORY'] || 10240).to_i
 $vm_node_mem = (ENV['NODE_MEMORY'] || 4096).to_i
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
@@ -139,6 +139,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     c.vm.network "private_network", ip: "#{$control_ip}"
     c.vm.network "private_network", ip: "#{$control_alt_ip}"
 #    c.vm.network "public_network", auto_config: false
+    if "#{$num_node.to_i}" == "0"
+      config.vm.provision "ansible" do |a|
+        a.playbook = "configure_baseline.yml"
+        a.limit = "all"
+      end
+    end
   end
 
   # Kubernetes node
