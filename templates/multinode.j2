@@ -1,31 +1,20 @@
 # These initial groups are the only groups required to be modified. The
 # additional groups are for more control of the environment.
 [control]
-kolla-control.opsits.com
 control
-# These hostname must be resolvable from your deployment host
-#__CONTROL__
-
-# The above can also be specified as follows:
-#control[01:03]     ansible_user=kolla
 
 # The network nodes are where your l3-agent and loadbalancers will run
 # This can be the same as a host in the control group
 [network]
-kolla-control.opsits.com
 control
-#__CONTROL__
 
 [compute]
-kolla-compute.opsits.com
-node-1
-
-#__COMPUTE__
+{% for host in groups['all'] %}{{host}}
+{% endfor %}
 
 [monitoring]
 control
-kolla-control.opsits.com
-#__CONTROL__
+
 
 # When compute nodes and control nodes use different interfaces,
 # you can specify "api_interface" and another interfaces like below:
@@ -33,17 +22,26 @@ kolla-control.opsits.com
 
 [storage]
 control
-kolla-control.opsits.com
-#__CONTROL__
 
 [baremetal:children]
 control
 network
 compute
 storage
+monitoring
 
 # You can explicitly specify which hosts run each project by updating the
 # groups in the sections below. Common services are grouped together.
+[chrony-server:children]
+control
+
+[chrony:children]
+control
+network
+compute
+storage
+monitoring
+
 [collectd:children]
 compute
 
@@ -56,11 +54,18 @@ control
 [influxdb:children]
 monitoring
 
+[karbor:children]
+control
+
 [kibana:children]
 control
 
 [telegraf:children]
+compute
+control
 monitoring
+network
+storage
 
 [elasticsearch:children]
 control
@@ -95,6 +100,9 @@ control
 [cloudkitty:children]
 control
 
+[freezer:children]
+control
+
 [memcached:children]
 control
 
@@ -111,6 +119,9 @@ control
 control
 
 [murano:children]
+control
+
+[solum:children]
 control
 
 [ironic:children]
@@ -140,7 +151,16 @@ control
 [congress:children]
 control
 
+[panko:children]
+control
+
 [gnocchi:children]
+control
+
+[tacker:children]
+control
+
+[trove:children]
 control
 
 # Tempest
@@ -160,6 +180,15 @@ control
 control
 
 [searchlight:children]
+control
+
+[octavia:children]
+control
+
+[designate:children]
+control
+
+[placement:children]
 control
 
 # Additional control implemented here. These groups allow you to control which
@@ -196,6 +225,9 @@ nova
 nova
 
 [nova-compute-ironic:children]
+nova
+
+[nova-serialproxy:children]
 nova
 
 # Neutron
@@ -247,6 +279,10 @@ cloudkitty
 [cloudkitty-processor:children]
 cloudkitty
 
+# Freezer
+[freezer-api:children]
+freezer
+
 # iSCSI
 [iscsid:children]
 compute
@@ -256,6 +292,16 @@ ironic-conductor
 [tgtd:children]
 storage
 
+# Karbor
+[karbor-api:children]
+karbor
+
+[karbor-protection:children]
+karbor
+
+[karbor-operationengine:children]
+karbor
+
 # Manila
 [manila-api:children]
 manila
@@ -264,7 +310,10 @@ manila
 manila
 
 [manila-share:children]
-storage
+network
+
+[manila-data:children]
+manila
 
 # Swift
 [swift-proxy-server:children]
@@ -333,6 +382,19 @@ sahara
 [sahara-engine:children]
 sahara
 
+# Solum
+[solum-api:children]
+solum
+
+[solum-worker:children]
+solum
+
+[solum-deployer:children]
+solum
+
+[solum-conductor:children]
+solum
+
 # Mistral
 [mistral-api:children]
 mistral
@@ -382,6 +444,10 @@ congress
 [congress-policy-engine:children]
 congress
 
+# Panko
+[panko-api:children]
+panko
+
 # Gnocchi
 [gnocchi-api:children]
 gnocchi
@@ -391,6 +457,16 @@ gnocchi
 
 [gnocchi-metricd:children]
 gnocchi
+
+# Trove
+[trove-api:children]
+trove
+
+[trove-conductor:children]
+trove
+
+[trove-taskmanager:children]
+trove
 
 # Multipathd
 [multipathd:children]
@@ -419,3 +495,39 @@ searchlight
 
 [searchlight-listener:children]
 searchlight
+
+# Octavia
+[octavia-api:children]
+octavia
+
+[octavia-health-manager:children]
+octavia
+
+[octavia-housekeeping:children]
+octavia
+
+[octavia-worker:children]
+octavia
+
+# Designate
+[designate-api:children]
+designate
+
+[designate-central:children]
+designate
+
+[designate-mdns:children]
+designate
+
+[designate-worker:children]
+designate
+
+[designate-sink:children]
+designate
+
+[designate-backend-bind9:children]
+designate
+
+# Placement
+[placement-api:children]
+placement

@@ -8,7 +8,7 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.require_version ">= 1.7.4"
 
 # The number of nodes to provision
-$num_node = (ENV['NUM_NODES'] || 0).to_i
+$num_node = (ENV['NUM_NODES'] || 1).to_i
 
 # ip configuration
 $control_ip = ENV['CONTROL_IP'] || "192.168.56.10"
@@ -53,8 +53,8 @@ else #  windows?
 end
 
 # Give VM 1024MB of RAM by default
-$vm_control_mem = (ENV['CONTRL_MEMORY'] || 10240).to_i
-$vm_node_mem = (ENV['NODE_MEMORY'] || 4096).to_i
+$vm_control_mem = (ENV['CONTRL_MEMORY'] || 8192).to_i
+$vm_node_mem = (ENV['NODE_MEMORY'] || 2048).to_i
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   if Vagrant.has_plugin?("vagrant-proxyconf")
@@ -124,10 +124,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       v.customize ["modifyvm", :id, "--nictype1", "virtio"]
       v.customize ["modifyvm", :id, "--nictype2", "virtio"]
       v.customize ["modifyvm", :id, "--nictype3", "virtio"]
-      # unless File.exist?("#{vm_name}.vdi")
-      #   v.customize ['createhd', '--filename', "#{vm_name}.vdi", '--variant', 'Fixed', '--size', 20 * 1024]
-      # end
-      # v.customize ['storageattach', :id,  '--storagectl', 'SCSI', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', "#{vm_name}.vdi"]
+      unless File.exist?("#{vm_name}.vdi")
+        v.customize ['createhd', '--filename', "#{vm_name}.vdi", '--variant', 'Fixed', '--size', 20 * 1024]
+      end
+      v.customize ['storageattach', :id,  '--storagectl', 'SCSI', '--port', 2, '--device', 0, '--type', 'hdd', '--medium', "#{vm_name}.vdi"]
     end
   end
 

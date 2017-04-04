@@ -41,12 +41,11 @@
       - post-install.sh
       - debian-cmp.sh
       - setup_network.sh
-      - multinode.sh
       - import_image.sh
       - node_delete.sh
       - launch.sh
   - name: upload multinode template
-    copy: src=templates/multinode.j2 dest=/root/multinode
+    template: src=templates/multinode.j2 dest=/root/multinode
 
 - hosts: control
   become: true
@@ -80,3 +79,14 @@
     ignore_errors: true
   - name: enable masquerade (NAT) on external interface
     include: tasks/masq.yml
+  - name: check for cinder-volumes group
+    shell: pvdisplay | awk '/sdc/ {print $3}'
+    register: pvdisk
+  - name: set cinder-volume physical group
+    command: pvcreate /dev/sdc
+    when: pvdisk.rc == 0
+    register: pvcreate
+  - name: set cinder-volume volume group
+    command: vgcreate cinder-volumes /dev/sdc
+    when: pvdisk.rc == 0 and pvcreate.rc == 0
+
