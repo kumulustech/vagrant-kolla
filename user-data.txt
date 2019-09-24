@@ -1,0 +1,15 @@
+#cloud-config
+chpasswd:
+  list: |
+    ubuntu:ubuntu
+  expire: False
+users:
+  - name: obs
+    ssh-authorized-keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAtxP3A5vfb2FrLkalrSgN1xfZqth+S5Wznt6vL1TBnUcuNQ5Zvkoa6KBFL/D6Ylo
+SOaRUejYeem7bMCNNkFknSh5DIevBzCJ+PmP6pBlsKQYyvKp2xjhGIXf/QlyCcU9DocJynMZ1K2BsZvxyoEIIN/tIhc2XMVV+TaTlgMm1yg
+Zzi/lzYobxhbvPgfIl3gAuoyVJUfY09tKH1byZXgzcB1bNXGc5OiXrjqd9NXjyrnIAayFd2NN0p5SgXG961x9lmdFenGeoiWTZMD0oYA8wF
+T6KzHuzdiFf6fP6qv9Zwlo76ci5HK1ltqmea8+9yhgKR9zQ5nzMESie4goYffmuWQ== rstarmer@gmail.com
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    shell: /bin/bash
+

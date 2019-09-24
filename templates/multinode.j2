@@ -1,19 +1,18 @@
 # These initial groups are the only groups required to be modified. The
 # additional groups are for more control of the environment.
 [control]
-control
+{% for host in groups['control'] %}{{host}}
+{% endfor %}
 
 # The network nodes are where your l3-agent and loadbalancers will run
 # This can be the same as a host in the control group
 [network]
-control
-
-[compute]
-{% for host in groups['all'] %}{{host}}
+{% for host in groups['control'] %}{{host}}
 {% endfor %}
 
 [monitoring]
-control
+{% for host in groups['control'] %}{{host}}
+{% endfor %}
 
 
 # When compute nodes and control nodes use different interfaces,
@@ -21,7 +20,34 @@ control
 #compute01 neutron_external_interface=eth0 api_interface=em1 storage_interface=em1 tunnel_interface=em1
 
 [storage]
-control
+{% for host in groups['control'] %}{{host}}
+{% endfor %}
+
+# inner-compute is the groups of compute nodes which do not have
+# external reachability.
+# DEPRECATED, the group will be removed in S release of OpenStack,
+# use variable neutron_compute_dvr_mode instead.
+[inner-compute]
+
+# external-compute is the groups of compute nodes which can reach
+# outside.
+# DEPRECATED, the group will be removed in S release of OpenStack,
+# use variable neutron_compute_dvr_mode instead.
+[external-compute]
+{% for host in groups['compute'] %}{{host}}
+{% endfor %}
+
+[compute:children]
+inner-compute
+external-compute
+
+# When compute nodes and control nodes use different interfaces,
+# you need to comment out "api_interface" and other interfaces from the globals.yml
+# and specify like below:
+#compute01 neutron_external_interface=eth0 api_interface=em1 storage_interface=em1 tunnel_interface=em1
+
+[deployment]
+localhost       ansible_connection=local
 
 [baremetal:children]
 control
@@ -33,7 +59,7 @@ monitoring
 # You can explicitly specify which hosts run each project by updating the
 # groups in the sections below. Common services are grouped together.
 [chrony-server:children]
-control
+haproxy
 
 [chrony:children]
 control
@@ -50,9 +76,16 @@ monitoring
 
 [etcd:children]
 control
+compute
 
 [influxdb:children]
 monitoring
+
+[prometheus:children]
+monitoring
+
+[kafka:children]
+control
 
 [karbor:children]
 control
@@ -73,11 +106,40 @@ control
 [haproxy:children]
 network
 
+[hyperv]
+#hyperv_host
+
+[hyperv:vars]
+#ansible_user=user
+#ansible_password=password
+#ansible_port=5986
+#ansible_connection=winrm
+#ansible_winrm_server_cert_validation=ignore
+
 [mariadb:children]
 control
 
 [rabbitmq:children]
 control
+
+[outward-rabbitmq:children]
+control
+
+[qdrouterd:children]
+control
+
+[monasca-agent:children]
+compute
+control
+monitoring
+network
+storage
+
+[monasca:children]
+monitoring
+
+[storm:children]
+monitoring
 
 [mongodb:children]
 control
@@ -92,6 +154,14 @@ control
 control
 
 [neutron:children]
+network
+
+[openvswitch:children]
+network
+compute
+manila-share
+
+[opendaylight:children]
 network
 
 [cinder:children]
@@ -173,6 +243,9 @@ control
 [vmtp:children]
 control
 
+[vitrage:children]
+control
+
 [watcher:children]
 control
 
@@ -189,6 +262,24 @@ control
 control
 
 [placement:children]
+control
+
+[bifrost:children]
+deployment
+
+[zookeeper:children]
+control
+
+[zun:children]
+control
+
+[skydive:children]
+monitoring
+
+[redis:children]
+control
+
+[blazar:children]
 control
 
 # Additional control implemented here. These groups allow you to control which
@@ -246,10 +337,25 @@ neutron
 [neutron-metadata-agent:children]
 neutron
 
-[neutron-vpnaas-agent:children]
+[neutron-bgp-dragent:children]
+neutron
+
+[neutron-infoblox-ipam-agent:children]
+neutron
+
+[ironic-neutron-agent:children]
 neutron
 
 # Ceph
+[ceph-mds:children]
+ceph
+
+[ceph-mgr:children]
+ceph
+
+[ceph-nfs:children]
+ceph
+
 [ceph-mon:children]
 ceph
 
@@ -283,11 +389,14 @@ cloudkitty
 [freezer-api:children]
 freezer
 
+[freezer-scheduler:children]
+freezer
+
 # iSCSI
 [iscsid:children]
 compute
 storage
-ironic-conductor
+ironic
 
 [tgtd:children]
 storage
@@ -355,6 +464,50 @@ murano
 [murano-engine:children]
 murano
 
+# Monasca
+[monasca-agent-collector:children]
+monasca-agent
+
+[monasca-agent-forwarder:children]
+monasca-agent
+
+[monasca-agent-statsd:children]
+monasca-agent
+
+[monasca-api:children]
+monasca
+
+[monasca-grafana:children]
+monasca
+
+[monasca-log-api:children]
+monasca
+
+[monasca-log-transformer:children]
+monasca
+
+[monasca-log-persister:children]
+monasca
+
+[monasca-log-metrics:children]
+monasca
+
+[monasca-thresh:children]
+monasca
+
+[monasca-notification:children]
+monasca
+
+[monasca-persister:children]
+monasca
+
+# Storm
+[storm-worker:children]
+storm
+
+[storm-nimbus:children]
+storm
+
 # Ironic
 [ironic-api:children]
 ironic
@@ -366,6 +519,9 @@ ironic
 ironic
 
 [ironic-pxe:children]
+ironic
+
+[ironic-ipxe:children]
 ironic
 
 # Magnum
@@ -406,16 +562,10 @@ mistral
 mistral
 
 # Ceilometer
-[ceilometer-api:children]
-ceilometer
-
 [ceilometer-central:children]
 ceilometer
 
 [ceilometer-notification:children]
-ceilometer
-
-[ceilometer-collector:children]
 ceilometer
 
 [ceilometer-compute:children]
@@ -471,6 +621,7 @@ trove
 # Multipathd
 [multipathd:children]
 compute
+storage
 
 # Watcher
 [watcher-api:children]
@@ -516,8 +667,11 @@ designate
 [designate-central:children]
 designate
 
-[designate-mdns:children]
+[designate-producer:children]
 designate
+
+[designate-mdns:children]
+network
 
 [designate-worker:children]
 designate
@@ -531,3 +685,79 @@ designate
 # Placement
 [placement-api:children]
 placement
+
+# Zun
+[zun-api:children]
+zun
+
+[zun-wsproxy:children]
+zun
+
+[zun-compute:children]
+compute
+
+# Skydive
+[skydive-analyzer:children]
+skydive
+
+[skydive-agent:children]
+compute
+network
+
+# Tacker
+[tacker-server:children]
+tacker
+
+[tacker-conductor:children]
+tacker
+
+# Vitrage
+[vitrage-api:children]
+vitrage
+
+[vitrage-notifier:children]
+vitrage
+
+[vitrage-graph:children]
+vitrage
+
+[vitrage-collector:children]
+vitrage
+
+[vitrage-ml:children]
+vitrage
+
+# Blazar
+[blazar-api:children]
+blazar
+
+[blazar-manager:children]
+blazar
+
+# Prometheus
+[prometheus-node-exporter:children]
+monitoring
+control
+compute
+network
+storage
+
+[prometheus-mysqld-exporter:children]
+mariadb
+
+[prometheus-haproxy-exporter:children]
+haproxy
+
+[prometheus-memcached-exporter:children]
+memcached
+
+[prometheus-cadvisor:children]
+monitoring
+control
+compute
+network
+storage
+
+[prometheus-alertmanager:children]
+monitoring
+

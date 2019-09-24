@@ -14,33 +14,27 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.source ~/admin.rc
 
-source /root/open.rc
+source ~/open.rc
 
-tenant=`openstack project list -f csv --quote none | grep admin | cut -d, -f1`
+tenant=`openstack project list -f csv --quote none --insecure | grep admin | cut -d, -f1`
 
-public_network=${1:-192.168.57}
-ip a d ${public_network}.10/24 dev enp0s9
-ip l s enp0s9 up
-ip a a ${public_network}.254/24 dev br-ex
-ip l s br-ex up
-
-neutron net-create public --tenant-id ${tenant} --router:external --provider:network_type flat --provider:physical_network physnet1 --shared
+openstack network create public --project admin --external --provider-network-type flat --provider-physical-network physnet1 --share --default --insecure
 #if segmented network{vlan,vxlan,gre}: --provider:segmentation_id ${segment_id}
-neutron subnet-create public ${public_network}.0/24 --tenant-id ${tenant} --allocation-pool start=${public_network}.30,end=${public_network}.99 --dns-nameserver 8.8.8.8 --disable-dhcp
-# --host-route destination=0.0.0.0,nexthop=10.2.0.1
+openstack subnet create public --subnet-range 147.75.89.128/27 --project admin --gateway 147.75.89.129 --allocation-pool start=147.75.89.130,end=147.75.89.158 --no-dhcp --network public --insecure
 # if you need a specific route to get "out" of your public network: --host-route destination=10.0.0.0/8,nexthop=10.1.10.254
 
-neutron net-create private --tenant-id ${tenant}
-neutron subnet-create private 192.168.100.0/24 --tenant-id ${tenant} --dns-nameserver 8.8.8.8 --name private
+openstack  network create private --project admin --insecure
+openstack  subnet create private --subnet-range 192.168.100.0/24 --project admin --dns-nameserver 8.8.8.8 --dns-nameserver 8.8.4.4 --dhcp --network private --insecure
 
 
-neutron router-create pub-router --tenant-id ${tenant}
-neutron router-gateway-set pub-router public
-neutron router-interface-add pub-router private
+openstack  router create pub-router --project admin --insecure
+
+openstack  router set pub-router --external-gateway public --insecure
+openstack  router add subnet pub-router private --insecure
 
 # Adjust the default security group.  This is not good practice
-default_group=`neutron security-group-list | awk '/ default / {print $2}' | tail -n 1`
-neutron security-group-rule-create --direction ingress --port-range-min 22 --port-range-max 22 --protocol tcp --remote-ip-prefix 0.0.0.0/0 ${default_group} 
-neutron security-group-rule-create --direction ingress --port-range-min 80 --port-range-max 80 --protocol tcp --remote-ip-prefix 0.0.0.0/0 ${default_group}
-neutron security-group-rule-create --direction ingress --port-range-min 443 --port-range-max 443 --protocol tcp --remote-ip-prefix 0.0.0.0/0 ${default_group}
-neutron security-group-rule-create --direction ingress --protocol icmp --remote-ip-prefix 0.0.0.0/0 ${default_group}
+default_group=`openstack  security group list --project admin --insecure | awk '/ default / {print $2}'`
+openstack  security group rule create --ingress --dst-port 22 --protocol tcp --remote-ip 0.0.0.0/0 ${default_group}  --insecure
+openstack  security group rule create --ingress --dst-port 80 --protocol tcp --remote-ip 0.0.0.0/0 ${default_group}  --insecure
+openstack  security group rule create --ingress --dst-port 443 --protocol tcp --remote-ip 0.0.0.0/0 ${default_group}  --insecure
+openstack  security group rule create --ingress --protocol icmp --remote-ip 0.0.0.0/0 ${default_group}  --insecure

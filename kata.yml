@@ -1,0 +1,36 @@
+---
+- hosts: all
+  become: true
+  become_user: root
+  tasks:
+    - name: add kata repo
+      apt_repository:
+        repo: deb http://download.opensuse.org/repositories/home:/katacontainers:/release/xUbuntu_16.04/ /
+        filename: kata-containers
+        state: present
+    - name: add kata repo key
+      apt_key:
+        url: http://download.opensuse.org/repositories/home:/katacontainers:/release/xUbuntu_16.04/Release.key
+    - name: install kata components
+      apt:
+        update_cache: yes
+        name: "{{item}}"
+      with_items:
+        - kata-runtime
+        -  kata-proxy
+        -  kata-shim
+    - name: add kata as default runtime for docker
+      copy:
+        src: files/daemon.json
+        dest: /etc/docker/daemon.json
+        backup: yes
+        mode: 644
+        owner: root
+    - name: reload daemon config
+      service:
+        name: docker
+        state: reloaded
+    - name: restart docker
+      service:
+        name: docker
+        state: restarted

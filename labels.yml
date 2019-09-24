@@ -1,0 +1,9 @@
+---
+- name: ceph label
+  command: parted /dev/{{item}} -s -- mklabel gpt mkpart KOLLA_CEPH_OSD_BOOTSTRAP 1 -1
+  with_items:
+    - sda
+    - sdb
+    - sdc
+- name: cache label
+  command: parted /dev/sdd -s -- mklabel gpt mkpart KOLLA_CEPH_OSD_CACHE_BOOTSTRAP 1 -1

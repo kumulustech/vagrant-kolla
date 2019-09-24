@@ -1,0 +1,14 @@
+[all]
+{% for item in packet_info['devices'] %}{{item.hostname}}  ansible_ssh_host={{item.public_ipv4}}
+{% endfor %}
+
+[control]
+control
+
+[compute]
+compute1
+compute2
+
+[all:vars]
+ansible_connection=ssh
+ansible_ssh_user=root

@@ -1,9 +1,8 @@
 #! /bin/bash
 
-source /root/open.rc
-curl http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img > cirros-0.3.4-x86_64-disk.img
-openstack image create --container-format bare --disk-format raw --min-disk 1 --min-ram 256 --public --file cirros-0.3.4-x86_64-disk.img cirros
-
-curl https://cloud-images.ubuntu.com/releases/16.04/release/ubuntu-16.04-server-cloudimg-amd64-disk1.img > ubuntu-16.04.img
-openstack image create --container-format bare --disk-format raw --min-disk 3 --min-ram 512 --public --file ubuntu-16.04.img ubuntu
-
+source ~/open.rc
+if [ ! -f xenial.img ]; then
+curl https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-disk1.img > xenial.img
+fi
+#curl http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img > cirros-0.3.4-x86_64-disk.img
+openstack  image create --container-format bare --disk-format qcow2 --min-disk 2 --min-ram 1000 --public --file xenial.img xenial --insecure

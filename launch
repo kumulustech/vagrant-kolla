@@ -1,0 +1,2 @@
+kolla-ansible -i multinode bootstrap-servers
+kolla-ansible -i multinode deploy

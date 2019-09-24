@@ -141,7 +141,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 #    c.vm.network "public_network", auto_config: false
     if "#{$num_node.to_i}" == "0"
       config.vm.provision "ansible" do |a|
-        a.playbook = "configure_baseline.yml"
+        a.groups = {
+          "control" => ["control"],
+          "compute"   => ["node-[1:$num_node]"]
+        }
+        a.playbook = "initialize.yml"
         a.limit = "all"
       end
     end
@@ -162,7 +166,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       node.vm.network "private_network", ip: "#{node_alt_ip}"
       if "#{n}" == "#{$num_node.to_i-1}"
         config.vm.provision "ansible" do |a|
-          a.playbook = "configure_baseline.yml"
+          a.playbook = "initialize.yml"
+          a.groups = {
+            "control" => ["control"],
+            "compute"   => ["node-[1:$num_node]"]
+          }
           a.limit = "all"
         end
       end
